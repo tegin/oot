@@ -48,6 +48,21 @@ class Oot:
 
     def no_key(self, **kwargs):
         pass
+        
+    def checking_connection(self):
+        pass
+    
+    def failure_connection(self):
+        pass
+
+    def finished_connection(self):
+        pass
+
+    def waiting_for_connection(self):
+        pass
+
+    def start_connection(self, server, access_point):
+        pass
 
     def check_key(self, key, **kwargs):
         return self.connection.execute_action(

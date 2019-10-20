@@ -4,6 +4,11 @@ import os
 from cb.cb_oddoor import OddoorCB
 from oot.device import CardReader, KeyPad, Buzzer
 
+log_folder = os.getcwd() + "/log"
+
+if not os.path.isdir(log_folder):
+    os.mkdir(log_folder)
+
 logging.config.fileConfig("oddoor.logging.conf")
 
 _logger = logging.getLogger(__name__)
