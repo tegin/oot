@@ -1,0 +1,38 @@
+<html lang="en">
+
+<head>
+        <meta charset="utf-8" />
+        <title>Data Table</title>
+        <meta name="viewport" content="initial-scale=1.0; maximum-scale=1.0; width=device-width;">
+        <link rel="stylesheet" href="static/table.css?version=8">
+</head>
+
+<body>
+        <table class="table-fill">
+                <thead>
+                        <tr>
+                                <th class="text-left">Parameter</th>
+                                <th class="text-left">Value</th>
+                        </tr>
+                </thead>
+                <tbody class="table-hover">
+
+                        <tr>
+                                <td class="text-left">Odoo Host</td>
+                                <td class="text-left">{{ result["host"] }}</td>
+                        </tr>
+                        <tr>
+                                <td class="text-left">Device name </td>
+                                <td class="text-left">{{ result["name"] }}</td>
+                        </tr>
+                        {% for element in fields%}
+                                <tr>
+                                        <td class="text-left">{{ fields[element]['name'] }}</td>
+                                        <td class="text-left">{{ result[element] }}</td>
+                                </tr>
+                        {% endfor %}
+                </tbody>
+        </table>
+
+
+</body>

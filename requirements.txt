@@ -1,0 +1,10 @@
+evdev
+flask
+mfrc522
+multiprocessing
+netifaces
+pycountry
+PyAccessPoint
+requests
+wifi
+werkzeug
