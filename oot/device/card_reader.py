@@ -12,7 +12,7 @@ class CardReader(SimpleMFRC522):
         return "{:02x}{:02x}{:02x}{:02x}".format(uid[0], uid[1], uid[2], uid[3])
 
     def scan_card(self):
-        id = False
-        while not id:
-            id = self.read_uid_no_block()
-        return id
+        uid = False
+        while not uid:
+            uid = self.read_uid_no_block()
+        return uid

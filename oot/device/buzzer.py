@@ -1,5 +1,6 @@
-from RPi import GPIO
 import time
+
+from RPi import GPIO
 
 
 class Buzzer:

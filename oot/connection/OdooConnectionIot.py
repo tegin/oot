@@ -1,6 +1,8 @@
-import logging
-import requests
 import json
+import logging
+
+import requests
+
 from .OdooConnection import OdooConnection
 
 _logger = logging.getLogger(__name__)
@@ -14,7 +16,7 @@ class OdooConnectionIot(OdooConnection):
         try:
             input_vals = self.j_data["inputs"][oot_input]
             request = requests.post(
-                "%s/iot/%s/action" % (self.url, input_vals["serial"]),
+                "{}/iot/{}/action".format(self.url, input_vals["serial"]),
                 data={"passphrase": input_vals["passphrase"], "value": key},
             )
             request.raise_for_status()

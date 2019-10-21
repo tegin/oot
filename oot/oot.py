@@ -1,10 +1,11 @@
+import json
 import logging
+import os
 import traceback
 from io import StringIO
-import os
-from .server.server import initialize
-import json
+
 from .connection import OdooConnectionIot
+from .server.server import initialize
 
 _logger = logging.getLogger(__name__)
 
@@ -47,10 +48,10 @@ class Oot:
 
     def no_key(self, **kwargs):
         pass
-        
+
     def checking_connection(self):
         pass
-    
+
     def failure_connection(self):
         pass
 

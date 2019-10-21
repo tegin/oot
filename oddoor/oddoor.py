@@ -1,5 +1,6 @@
-from oot import Oot
 import logging
+
+from oot import Oot
 
 _logger = logging.getLogger(__name__)
 

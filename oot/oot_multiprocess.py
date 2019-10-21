@@ -1,7 +1,8 @@
-from .oot import Oot
+import time
 from multiprocessing import Process, Queue
 from multiprocessing.queues import Queue as QueueClass
-import time
+
+from .oot import Oot
 
 
 class OotMultiProcessing(Oot):

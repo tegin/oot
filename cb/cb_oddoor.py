@@ -1,9 +1,11 @@
-import RPi.GPIO as GPIO
-from oot import OotMultiProcessing
-from oddoor import Oddoor
-import time
 import logging
+import time
+
+import RPi.GPIO as GPIO
 from evdev import InputDevice, categorize, ecodes
+
+from oddoor import Oddoor
+from oot import OotMultiProcessing
 
 dev = InputDevice("/dev/input/event0")
 _logger = logging.getLogger(__name__)
@@ -172,9 +174,9 @@ def get_data_scanner(**kwargs):
 def get_data_mfrc522(reader, **kwargs):
     time.sleep(5.0)
     while True:
-        id = reader.scan_card()
-        if id:
-            return id
+        uid = reader.scan_card()
+        if uid:
+            return uid
 
 
 def get_data_keypad(keypad, buzzer, **kwargs):

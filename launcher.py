@@ -2,7 +2,7 @@ import logging.config
 import os
 
 from cb.cb_oddoor import OddoorCB
-from oot.device import CardReader, KeyPad, Buzzer
+from oot.device import Buzzer, CardReader, KeyPad
 
 log_folder = os.getcwd() + "/log"
 
