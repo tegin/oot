@@ -1,6 +1,8 @@
 import logging
+import os
 import time
 
+import psutil
 import RPi.GPIO as GPIO
 from evdev import InputDevice, categorize, ecodes
 
@@ -221,6 +223,12 @@ class OddoorCB(OotMultiProcessing, Oddoor):
             [get_data_mfrc522, self.reader],
             [get_data_keypad, self.keypad, self.buzzer],
         ]
+
+    @staticmethod
+    def start_execute_function(function, *args, queue=False, **kwargs):
+        p = psutil.Process(os.getpid())
+        # set to lowest priority, this is windows only, on Unix use ps.nice(19)
+        p.nice(6)
 
     def no_key(self, **kwargs):
         time.sleep(0.5)

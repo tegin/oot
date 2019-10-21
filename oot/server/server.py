@@ -60,7 +60,7 @@ def initialize(oot):
 
     connected_eth = is_interface_up("eth0")
 
-    parameters = {}
+    parameters = {"interfaces": []}
     if not connected_eth:
         parameters["interfaces"] = [cell.ssid for cell in Cell.all("wlan0")]
 
@@ -110,13 +110,23 @@ def initialize(oot):
 
     _logger.info("Configuring Access Point")
     access_point = OotAccessPoint(ssid=oot.ssid, ip=DEFAULT_IP)
-    process(oot, access_point, app, parameters, connected_eth)
+    interfaces = is_interface_up("wlan0") or []
+    first_start = not any(
+        interface.get("addr", False) == DEFAULT_IP for interface in interfaces
+    )
+    process(oot, access_point, app, parameters, connected_eth, first_start)
 
 
-def process(oot, access_point, app, parameters, connected_eth):
+def process(oot, access_point, app, parameters, connected_eth, first_start=False):
     server = ServerThread(app)
     try:
         access_point.start()
+        if first_start:
+            _logger.info(
+                "On first start we must create twice the access point for configuration"
+            )
+            access_point.stop()
+            access_point.start()
         _logger.info("Access Point configured")
         if not access_point.is_running():
             raise Exception("Access point could not be raised")

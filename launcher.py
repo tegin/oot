@@ -1,21 +1,28 @@
 import logging.config
 import os
 
+import psutil
+
 from cb.cb_oddoor import OddoorCB
 from oot.device import Buzzer, CardReader, KeyPad
 
-log_folder = os.getcwd() + "/log"
+p = psutil.Process(os.getpid())
+p.nice(6)  # give the launcher process a low priority
+
+
+path = os.path.dirname(os.path.realpath(__file__))
+
+log_folder = path + "/log"
 
 if not os.path.isdir(log_folder):
     os.mkdir(log_folder)
 
-logging.config.fileConfig("oddoor.logging.conf")
+logging.config.fileConfig(path + "/oddoor.logging.conf")
 
-_logger = logging.getLogger(__name__)
-
-data_folder = os.getcwd() + "/data"
+data_folder = path + "/data"
 
 if not os.path.isdir(data_folder):
     os.mkdir(data_folder)
-
-OddoorCB(data_folder + "/data_iot.json", CardReader(), KeyPad(), Buzzer(7, 13)).run()
+OddoorCB(
+    data_folder + "/data_iot.json", CardReader(spd=200), KeyPad(), Buzzer(7, 13)
+).run()

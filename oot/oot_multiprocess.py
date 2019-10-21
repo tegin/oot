@@ -17,10 +17,13 @@ class OotMultiProcessing(Oot):
                 return value
             time.sleep(0.1)
 
-    @staticmethod
-    def execute_function(function, *args, queue=False, **kwargs):
+    def start_execute_function(self, function, *args, queue=False, **kwargs):
+        pass
+
+    def execute_function(self, function, *args, queue=False, **kwargs):
         if not isinstance(queue, QueueClass):
             raise Exception("A queue is required")
+        self.start_execute_function(function, *args, queue=False, **kwargs)
         while True:
             value = function(*args, **kwargs)
             if value:

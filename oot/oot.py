@@ -76,6 +76,7 @@ class Oot:
             with open(self.connection_path, "r") as f:
                 self.connection_data = json.loads(f.read())
             self.connection = self.connection_class(self.connection_data)
+        _logger.info("Process has been initialized successfully")
         try:
             while True:
                 key_result = self.get_data(**kwargs)
