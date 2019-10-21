@@ -10,9 +10,9 @@ class OdooConnectionIot(OdooConnection):
     def set_params(self):
         self.url = self.j_data["host"]
 
-    def execute_action(self, key, input="", **kwargs):
+    def execute_action(self, key, oot_input="", **kwargs):
         try:
-            input_vals = self.j_data["inputs"][input]
+            input_vals = self.j_data["inputs"][oot_input]
             request = requests.post(
                 "%s/iot/%s/action" % (self.url, input_vals["serial"]),
                 data={"passphrase": input_vals["passphrase"], "value": key},

@@ -105,8 +105,9 @@ def initialize(oot):
             )
 
     _logger.info("Configuring Access Point")
-    access_point = OotAccessPoint(ssid="OoTDevice", ip=DEFAULT_IP)
+    access_point = OotAccessPoint(ssid=oot.ssid, ip=DEFAULT_IP)
     process(oot, access_point,app, parameters, connected_eth)
+
 
 def process(oot, access_point, app, parameters, connected_eth):
     server = ServerThread(app)

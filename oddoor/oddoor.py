@@ -6,7 +6,7 @@ _logger = logging.getLogger(__name__)
 
 class Oddoor(Oot):
     template = "oddoor"
-    input = "call_lock"
+    oot_input = "call_lock"
 
     def access_granted(self, key, **kwargs):
         pass

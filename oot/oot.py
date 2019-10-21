@@ -13,13 +13,12 @@ current_folder = os.path.dirname(os.path.realpath(__file__))
 
 class Oot:
     connection_class = OdooConnectionIot
-    input = False
+    oot_input = False
     template = False
     folder = current_folder
     form_template = "form.html"
     result_template = "result.html"
     ssid = "OotDevice"
-    ssid_password = False
     fields = {}
     connection = False
     connection_data = {}
@@ -66,7 +65,7 @@ class Oot:
 
     def check_key(self, key, **kwargs):
         return self.connection.execute_action(
-            key, input=kwargs.get("input", self.input)
+            key, oot_input=kwargs.get("oot_input", self.oot_input)
         )
 
     def run(self, **kwargs):
