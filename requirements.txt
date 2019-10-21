@@ -1,7 +1,6 @@
 evdev
 flask
 mfrc522
-multiprocessing
 netifaces
 pycountry
 PyAccessPoint
