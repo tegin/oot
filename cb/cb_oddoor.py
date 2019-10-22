@@ -9,7 +9,10 @@ from evdev import InputDevice, categorize, ecodes
 from oddoor import Oddoor
 from oot import OotMultiProcessing
 
-dev = InputDevice("/dev/input/event0")
+try:
+    dev = InputDevice("/dev/input/event0")
+except Exception:
+    pass
 _logger = logging.getLogger(__name__)
 
 RELAY = 15
