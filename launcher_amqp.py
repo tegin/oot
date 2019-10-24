@@ -3,7 +3,7 @@ import os
 
 import psutil
 
-from cb.cb_amqp import AmqpOot
+from cb.cb_amqp import AmqpOdoorOot
 
 p = psutil.Process(os.getpid())
 p.nice(6)  # give the launcher process a low priority
@@ -22,4 +22,4 @@ data_folder = path + "/data"
 
 if not os.path.isdir(data_folder):
     os.mkdir(data_folder)
-AmqpOot(data_folder + "/data.json").run()
+AmqpOdoorOot(data_folder + "/data.json").run()

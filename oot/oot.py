@@ -26,11 +26,9 @@ class Oot:
     connection_path = False
 
     def __init__(self, connection):
-        if isinstance(connection, OdooConnectionIot):
-            self.connection = connection
-        elif isinstance(connection, dict):
+        if isinstance(connection, dict):
             self.connection_data = connection
-            self.connection = self.connection_class(connection)
+            self.generate_connection()
         elif isinstance(connection, str):
             self.connection_path = connection
 
@@ -69,14 +67,21 @@ class Oot:
             key, oot_input=kwargs.get("oot_input", self.oot_input)
         )
 
+    def generate_connection(self):
+        self.connection = self.connection_class(self.connection_data)
+
     def run(self, **kwargs):
-        if not self.connection:
+        if not self.connection and self.connection_path:
             if not os.path.exists(self.connection_path):
                 self.initialize()
             with open(self.connection_path, "r") as f:
                 self.connection_data = json.loads(f.read())
-            self.connection = self.connection_class(self.connection_data)
-        _logger.info("Process has been initialized successfully")
+        if not self.connection:
+            self.generate_connection()
+            _logger.info("Connection has been initialized successfully")
+        self._run(**kwargs)
+
+    def _run(self, **kwargs):
         try:
             while True:
                 key_result = self.get_data(**kwargs)
