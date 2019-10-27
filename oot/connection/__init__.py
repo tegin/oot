@@ -1,1 +1,1 @@
-from .OdooConnectionIot import OdooConnectionIot
+from .odoo_connection_iot import OdooConnectionIot

@@ -3,7 +3,7 @@ import logging
 
 import requests
 
-from .OdooConnection import OdooConnection
+from .odoo_connection import OdooConnection
 
 _logger = logging.getLogger(__name__)
 

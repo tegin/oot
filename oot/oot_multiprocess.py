@@ -29,7 +29,7 @@ class OotMultiProcessing(Oot):
             if value:
                 queue.put(value)
 
-    def run(self, **kwargs):
+    def _run(self, **kwargs):
         for function in self.functions:
             process = Process(
                 target=self.execute_function,
@@ -38,4 +38,4 @@ class OotMultiProcessing(Oot):
             )
             process.start()
             self.jobs.append(process)
-        return super().run(**kwargs)
+        return super()._run(**kwargs)
