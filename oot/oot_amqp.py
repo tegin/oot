@@ -1,5 +1,5 @@
 import logging
-import os
+import subprocess
 import uuid
 from multiprocessing import Process
 
@@ -42,21 +42,29 @@ class OotAmqp(OotMultiProcessing):
         channel.basic_ack(basic_deliver.delivery_tag)
 
     def toggle_service(self, service):
-        stat = os.system("systemctl is-active --quiet ssh")
-        if stat == 0:
-            os.system("systemctl stop ssh")
-            os.system("systemctl disable ssh")
+        stat = subprocess.Popen(
+            "systemctl is-active --quiet %s; echo $?" % service,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        ).communicate()
+        _logger.info(stat)
+        if stat[0] == b"0\n":
+            subprocess.Popen(["systemctl", "stop", service])
+            subprocess.Popen(["systemctl", "disable", service])
         else:
-            os.system("systemctl enable ssh")
-            os.system("systemctl start ssh")
+            subprocess.Popen(["systemctl", "enable", service])
+            subprocess.Popen(["systemctl", "start", service])
 
     def _on_message(self, channel, basic_deliver, properties, body):
         if basic_deliver.routing_key == "oot.%s.reboot" % self.connection_data.get(
             "name"
         ):
-            os.system("reboot")
+            subprocess.Popen(["reboot"])
+            return
         if basic_deliver.routing_key == "oot.%s.ssh" % self.connection_data.get("name"):
             self.toggle_service("ssh")
+            return
         else:
             self.queue.put(body.decode("utf-8"))
 
