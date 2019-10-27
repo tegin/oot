@@ -1,7 +1,6 @@
-import os
-import re
-
 from setuptools import find_packages, setup
+
+from oot.constants import __version__ as version
 
 try:
     # For pip >= 10.
@@ -12,9 +11,6 @@ except ImportError:
     from pip.req import parse_requirements
     from pip.download import PipSession
 
-
-with open(os.path.join("oot", "constants.py"), "rt") as consts_file:
-    version = re.search(r"__version__ = \'(.*?)\'", consts_file.read()).group(1)
 
 install_reqs = parse_requirements("requirements.txt", session=PipSession())
 
