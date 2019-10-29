@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import subprocess
 import traceback
 from io import StringIO
 
@@ -18,6 +19,7 @@ class Oot:
     template = False
     folder = current_folder
     form_template = "form.html"
+    extra_tools_template = "extra_tools.html"
     result_template = "result.html"
     ssid = "OotDevice"
     fields = {}
@@ -25,7 +27,22 @@ class Oot:
     connection_data = {}
     connection_path = False
 
+    def extra_tools(self):
+        return {
+            "ssh": {
+                "name": ("Disable" if self.check_service("ssh") else "Enable") + " SSH",
+                "function": self.toggle_service_function("ssh"),
+            },
+            "reboot": {"name": "Reboot", "function": self.reboot},
+        }
+
     def __init__(self, connection):
+        self._fields = {}
+        for clss in self.__class__.mro():
+            if Oot in clss.mro():
+                for key in clss.fields:
+                    if key not in self._fields:
+                        self._fields[key] = clss.fields[key]
         if isinstance(connection, dict):
             self.connection_data = connection
             self.generate_connection()
@@ -105,3 +122,37 @@ class Oot:
             _logger.info("Exiting process after error")
             self.exit(**kwargs)
             raise
+
+    def check_service(self, service, **kwargs):
+        stat = subprocess.Popen(
+            "systemctl is-active --quiet %s; echo $?" % service,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            shell=True,
+        ).communicate()
+        return stat[0] == b"0\n"
+
+    def toggle_service_function(self, service, **kwargs):
+        def toggle(**kwtargs):
+            return self.toggle_service(service, **kwtargs)
+
+        return toggle
+
+    def toggle_service(self, service, **kwargs):
+        if self.check_service(service):
+            self.stop_service(service)
+        else:
+            self.start_service(service)
+
+    def stop_service(self, service, disable=True, **kwargs):
+        subprocess.Popen(["systemctl", "stop", service]).communicate()
+        if disable:
+            subprocess.Popen(["systemctl", "disable", service]).communicate()
+
+    def start_service(self, service, enable=True, **kwargs):
+        subprocess.Popen(["systemctl", "enable", service]).communicate()
+        if enable:
+            subprocess.Popen(["systemctl", "start", service]).communicate()
+
+    def reboot(self, **kwargs):
+        subprocess.Popen(["reboot"])
