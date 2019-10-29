@@ -37,13 +37,14 @@
       {% for element in fields%}
       <label for="{{element}}">{{ fields[element]['name'] }}</label>
       <span>{{ fields[element].get('description', '') }}</span>
-      <input type="text" id="{{element}}" name="{{element}}" placeholder="{{ fields[element].get('placeholder', '') }}" required>
+      <input type="text" id="{{element}}" name="{{element}}" placeholder="{{ fields[element].get('placeholder', '') }}" {{'required' if fields[element].get('required', True) else ''}}>
       {% endfor %}
     </fieldset>
     <fieldset>
       <legend><span class="number">{{ i }}</span>Go!</legend>
       <button type="submit">Configure!</button>
       <button type="reset">Reset parameters</button>
+      <button onclick="window.location.href='/extra_tools'">Extra tools</button>
     </fieldset>
   </form>
 </body>

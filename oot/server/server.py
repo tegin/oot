@@ -70,11 +70,21 @@ def initialize(oot):
         return render_template(
             oot.form_template,
             port=3000,
-            fields=oot.fields or {},
+            fields=oot._fields or {},
             interfaces=parameters["interfaces"],
             countries=COUNTRIES,
             connected=connected_eth,
         )
+
+    @app.route("/extra_tools", methods=["POST", "GET"])
+    def extra_tools():
+        extra_tools = oot.extra_tools()
+        for key in request.args:
+            if key == "tool":
+                tool = extra_tools.get(request.args.get(key))
+                if tool:
+                    tool["function"]()
+        return render_template(oot.extra_tools_template, tools=oot.extra_tools())
 
     @app.route("/result", methods=["POST", "GET"])
     def result():

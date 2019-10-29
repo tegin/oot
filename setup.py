@@ -27,7 +27,7 @@ setup(
     install_requires=install_requires,
     entry_points={},
     packages=find_packages(),
-    include_package_data=True,
+    package_data={"oot": ["static/*.css", "templates/*.html", "static/*.woff2"]},
     license="BSD",
     classifiers=[
         "Development Status :: 4 - Beta",

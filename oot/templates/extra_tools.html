@@ -1,0 +1,25 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuration portal</title>
+  <link href='static/nunito.css' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="static/main.css?version=1">
+</head>
+
+<body>
+  <form>
+    <fieldset>
+      <legend></span>Configure</legend>
+      {% for tool in tools %}
+      <button type="submit" name="tool" value="{{tool}}">{{tools[tool]['name']}}</button>
+      {% endfor %}
+    </fieldset>
+  </form>
+  <form action="/">
+    <fieldset>
+      <button type="submit">Go back</button>
+    </fieldset>
+  </form>
+</body>
+</html>
