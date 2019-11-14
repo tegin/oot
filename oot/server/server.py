@@ -92,7 +92,7 @@ def initialize(oot):
             results = request.form
             result_dic = results.to_dict(flat=False)
             result = {}
-            for key in oot.fields:
+            for key in oot._fields:
                 value = result_dic.get(key, False)
                 if value:
                     value = value[0]
