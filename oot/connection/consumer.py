@@ -44,7 +44,9 @@ class Consumer(object):
                 channel.basic_qos(prefetch_count=1)
                 channel.queue_declare(self.queue, **self.queue_options)
                 channel.exchange_declare(
-                    exchange=self.exchange_name, exchange_type=self.exchange_type, passive=True,
+                    exchange=self.exchange_name,
+                    exchange_type=self.exchange_type,
+                    passive=True,
                 )
                 for routing_key in self.options:
                     channel.queue_bind(

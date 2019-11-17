@@ -3,9 +3,11 @@ import logging
 import os
 import subprocess
 import traceback
+from inspect import getmembers
 from io import StringIO
 
 from .connection import OdooConnectionIot
+from .fields import Field
 from .server.server import initialize
 
 _logger = logging.getLogger(__name__)
@@ -22,6 +24,7 @@ class Oot:
     extra_tools_template = "extra_tools.html"
     result_template = "result.html"
     ssid = "OotDevice"
+
     fields = {}
     connection = False
     connection_data = {}
@@ -43,6 +46,13 @@ class Oot:
                 for key in clss.fields:
                     if key not in self._fields:
                         self._fields[key] = clss.fields[key]
+
+        def is_field(item):
+            return not callable(item) and isinstance(item, Field)
+
+        cls = type(self)
+        for attr, item in getmembers(cls, is_field):
+            self._fields[attr] = item.generate()
         if isinstance(connection, dict):
             self.connection_data = connection
             self.generate_connection()
@@ -86,6 +96,9 @@ class Oot:
 
     def generate_connection(self):
         self.connection = self.connection_class(self.connection_data)
+        for field in self._fields:
+            setattr(self, field, self.connection_data.get(field))
+        self.name = self.connection_data.get("name")
 
     def run(self, **kwargs):
         if not self.connection and self.connection_path:

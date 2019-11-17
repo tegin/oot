@@ -1,12 +1,15 @@
 import json
 import logging
 import uuid
+from inspect import getmembers
 from multiprocessing import Process
 
 import pika
 import psutil
 
+from . import api
 from .connection.consumer import Consumer
+from .fields import Field
 from .oot_multiprocess import OotMultiProcessing
 
 _logger = logging.getLogger(__name__)
@@ -14,19 +17,17 @@ _logger = logging.getLogger(__name__)
 
 class OotAmqp(OotMultiProcessing):
     consumer = False
-    fields = {
-        "amqp_host": {
-            "name": "Host for AMQP",
-            "placeHolder": "amqp://user:password@hostname:port",
-            "required": False,
-        },
-        "amqp_name": {
-            "name": "Unique name for this device on AMQP, if "
-            "blank, name of initial generated name on odoo will be used",
-            "required": False,
-        },
-        "amqp_check_key": {"name": "Key For System AMQP Calls", "required": False},
-    }
+    amqp_host = Field(
+        name="Host for AMQP",
+        placeholder="amqp://user:password@hostname:port",
+        required=False,
+    )
+    amqp_name = Field(
+        name="Unique name for this device on AMQP, if "
+        "blank, name of initial generated name on odoo will be used",
+        required=False,
+    )
+    amqp_check_key = Field(name="Key For System AMQP Calls", required=False)
 
     def amqp_machine_stats(self, **kwargs):
         return {
@@ -35,12 +36,31 @@ class OotAmqp(OotMultiProcessing):
             "temp": psutil.sensors_temperatures()["cpu-thermal"][0].current,
         }
 
+    @api.amqp("reboot")
+    def amqp_reboot(self, channel, basic_deliver, properties, body):
+        if body.decode("utf-8") == self.amqp_check_key:
+            return self.reboot()
+
+    @api.amqp("ssh")
+    def amq_ssh(self, channel, basic_deliver, properties, body):
+        if body.decode("utf-8") == self.amqp_check_key:
+            return self.toggle_service_function("ssh")()
+
+    @api.amqp("stats")
+    def amqp_stats(self, channel, basic_deliver, properties, body):
+        if body.decode("utf-8") == self.amqp_check_key:
+            return self.amqp_machine_stats()
+
     def get_default_amqp_options(self):
-        return {
-            "reboot": self.amqp_key_check(self.reboot),
-            "ssh": self.amqp_key_check(self.toggle_service_function("ssh")),
-            "stats": self.amqp_key_check(self.amqp_machine_stats),
-        }
+        result = {}
+
+        def is_command(func):
+            return callable(func) and hasattr(func, "_amqp_command")
+
+        cls = type(self)
+        for _attr, func in getmembers(cls, is_command):
+            result[func._amqp_command] = self.get_callback_function(func)
+        return result
 
     def amqp_key_check(self, funct, key=False):
         if not key:
@@ -60,14 +80,12 @@ class OotAmqp(OotMultiProcessing):
 
     def generate_connection(self):
         super().generate_connection()
-        amqp_host = self.connection_data.get("amqp_host", False)
+        amqp_host = self.amqp_host
         if amqp_host:
-            amqp_options = self.connection_data.get("amqp_options", [])
-            self.amqp_name = self.connection_data.get(
-                "amqp_name", self.connection_data.get("name")
-            )
+            amqp_options = []
+            self.amqp_name = self.amqp_name or self.name
             self.routing_base = "oot.%s" % self.amqp_name
-            self.amqp_check_key = self.connection_data.get("amqp_check_key")
+            self.amqp_check_key = self.amqp_check_key
             amqp_options += self.get_default_amqp_options()
             self.consumer = Consumer(
                 amqp_host,
