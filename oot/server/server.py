@@ -185,9 +185,7 @@ def process(oot, access_point, app, parameters, connected_eth, first_start=False
             parameters["processed"] = False
             return process(oot, access_point, app, parameters, connected_eth)
         try:
-            check_configuration(
-                parameters.get("result_data"), parameters.get("odoo_link"), oot
-            )
+            oot.connection_class.check_configuration(parameters, oot)
         except requests.HTTPError:
             parameters["processed"] = False
             return process(oot, access_point, app, parameters, connected_eth)

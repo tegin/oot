@@ -1,1 +1,2 @@
 from .odoo_connection_iot import OdooConnectionIot
+from .odoo_connection_xmlrpc import OdooConnectionXMLRPC

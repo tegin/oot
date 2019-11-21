@@ -26,3 +26,16 @@ class OdooConnectionIot(OdooConnection):
         except Exception as e:
             _logger.exception(e)
         return False
+
+    @classmethod
+    def check_configuration(cls, parameters, oot):
+        oot.checking_connection()
+        odoo_link = parameters.get("odoo_link")
+        response = requests.post(odoo_link, data={"template": oot.template})
+        try:
+            response.raise_for_status()
+        except requests.HTTPError:
+            oot.failure_connection()
+            raise
+        oot.finished_connection()
+        parameters["result_data"].update(json.loads(response.content.decode("utf-8")))

@@ -8,3 +8,7 @@ class OdooConnection:
 
     def execute_action(self, key, **kwargs):
         pass
+
+    @classmethod
+    def check_configuration(cls, parameters, oot):
+        pass
