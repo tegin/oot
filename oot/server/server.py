@@ -1,12 +1,10 @@
 import json
 import logging
 import os
-import subprocess
 import threading
 import time
 
 import pycountry
-import requests
 from flask import Flask, render_template, request
 from werkzeug.serving import make_server
 from wifi import Cell
@@ -19,18 +17,6 @@ _logger = logging.getLogger(__name__)
 DEFAULT_IP = "192.168.45.1"
 
 COUNTRIES = {c.alpha_2: c.name for c in pycountry.countries}
-
-
-def check_configuration(result, odoo_link, oot):
-    oot.checking_connection()
-    response = requests.post(odoo_link, data={"template": oot.template})
-    try:
-        response.raise_for_status()
-    except requests.HTTPError:
-        oot.failure_connection()
-        raise
-    oot.finished_connection()
-    result.update(json.loads(response.content.decode("utf-8")))
 
 
 class ServerThread(threading.Thread):
@@ -97,19 +83,21 @@ def initialize(oot):
                 if value:
                     value = value[0]
                 result[key] = value
+
+            parameters.update(
+                {"odoo_link": result_dic["odoo_link"][0], "result_data": result.copy()}
+            )
             if connected_eth:
-                check_configuration(result, result_dic["odoo_link"][0], oot)
+                oot.connection_class.check_configuration(parameters, oot)
                 with open(oot.connection_path, "w+") as outfile:
-                    json.dump(result, outfile)
+                    json.dump(parameters.get("result_data"), outfile)
             else:
                 parameters.update(
                     {
-                        "odoo_link": result_dic["odoo_link"][0],
                         "ssid": result_dic["ssid"][0],
                         "password": result_dic["password"][0] or False,
                         "hidden": False,
                         "country": result_dic["country"][0],
-                        "result_data": result.copy(),
                     }
                 )
                 oot.waiting_for_connection()
@@ -169,25 +157,7 @@ def process(oot, access_point, app, parameters, connected_eth, first_start=False
             if parameters.get("hidden"):
                 f.write("        scan_ssid=1")
             f.write("}\n")
-        subprocess.run(["wpa_cli", "terminate"])
-        subprocess.run(["systemctl", "restart", "dhcpcd.service"])
-        checks = 0
-        interfaces = is_interface_up("wlan0") or []
-        while (
-            not any(
-                interface.get("addr", False) != DEFAULT_IP for interface in interfaces
-            )
-        ) and checks < 20:
-            checks += 1
-            time.sleep(1)
-            interfaces = is_interface_up("wlan0") or []
-        if checks >= 20:
-            parameters["processed"] = False
-            return process(oot, access_point, app, parameters, connected_eth)
-        try:
-            oot.connection_class.check_configuration(parameters, oot)
-        except requests.HTTPError:
-            parameters["processed"] = False
-            return process(oot, access_point, app, parameters, connected_eth)
+        parameters["is_testing_loading"] = True
         with open(oot.connection_path, "w+") as outfile:
-            json.dump(parameters.get("result_data"), outfile)
+            json.dump(parameters, outfile)
+        oot.reboot()

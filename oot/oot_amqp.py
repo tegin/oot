@@ -21,13 +21,17 @@ class OotAmqp(OotMultiProcessing):
         name="Host for AMQP",
         placeholder="amqp://user:password@hostname:port",
         required=False,
+        sequence=100,
     )
     amqp_name = Field(
         name="Unique name for this device on AMQP, if "
         "blank, name of initial generated name on odoo will be used",
         required=False,
+        sequence=102,
     )
-    amqp_check_key = Field(name="Key For System AMQP Calls", required=False)
+    amqp_check_key = Field(
+        name="Key For System AMQP Calls", required=False, sequence=101
+    )
 
     def amqp_machine_stats(self, **kwargs):
         return {
