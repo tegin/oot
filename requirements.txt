@@ -1,6 +1,9 @@
 flask
 mfrc522
 netifaces
+packaging
+pika
+pip>=19.3.1
 pycountry
 PyAccessPoint
 requests
