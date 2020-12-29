@@ -1,4 +1,6 @@
 class Field:
+    """This class is intended to be used to define fields for the configuration
+    """
     def __init__(self, name, description=False, placeholder=False, required=True):
         self.name = name
         self.description = description

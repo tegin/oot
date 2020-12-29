@@ -28,12 +28,18 @@ class OotAmqp(OotMultiProcessing):
         required=False,
     )
     amqp_check_key = Field(name="Key For System AMQP Calls", required=False)
+    _temperature_field = "cpu-thermal"
 
     def amqp_machine_stats(self, **kwargs):
+        temperatures = psutil.sensors_temperatures()
+        if self._temperature_field in temperatures:
+            temperature = temperatures[self._temperature_field][0].current
+        else:
+            temperature = False
         return {
             "cpu_percentage": psutil.cpu_percent(),
             "virtual_memory_percentage": psutil.virtual_memory().percent,
-            "temp": psutil.sensors_temperatures()["cpu-thermal"][0].current,
+            "temp": temperature,
         }
 
     @api.amqp("reboot")

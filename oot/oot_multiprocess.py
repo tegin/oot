@@ -7,6 +7,10 @@ from .oot import Oot
 
 
 class OotMultiProcessing(Oot):
+    """This allows to use multiple functions that can send data to odoo.
+    In order to add a function we can add it on the functions or add a decorator
+    the decorator `api.oot` on the class function
+    """
     functions = []
     queue = Queue()
     jobs = []
@@ -24,7 +28,7 @@ class OotMultiProcessing(Oot):
     def execute_function(self, function, *args, queue=False, **kwargs):
         if not isinstance(queue, QueueClass):
             raise Exception("A queue is required")
-        self.start_execute_function(function, *args, queue=False, **kwargs)
+        self.start_execute_function(function, *args, queue=queue, **kwargs)
         while True:
             value = function(*args, **kwargs)
             if value:

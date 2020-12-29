@@ -50,7 +50,7 @@ class ServerThread(threading.Thread):
         self.srv.shutdown()
 
 
-def initialize(oot):
+def initialize(oot, no_access_point=False):
     app = Flask(
         __name__,
         template_folder="%s/templates" % oot.folder,
@@ -61,7 +61,7 @@ def initialize(oot):
     connected_eth = is_interface_up("eth0")
 
     parameters = {"interfaces": []}
-    if not connected_eth:
+    if not connected_eth and not no_access_point:
         parameters["interfaces"] = [cell.ssid for cell in Cell.all("wlan0")]
 
     @app.route("/")
@@ -73,7 +73,7 @@ def initialize(oot):
             fields=oot._fields or {},
             interfaces=parameters["interfaces"],
             countries=COUNTRIES,
-            connected=connected_eth,
+            connected=connected_eth or no_access_point,
         )
 
     @app.route("/extra_tools", methods=["POST", "GET"])
@@ -97,7 +97,7 @@ def initialize(oot):
                 if value:
                     value = value[0]
                 result[key] = value
-            if connected_eth:
+            if connected_eth or no_access_point:
                 check_configuration(result, result_dic["odoo_link"][0], oot)
                 with open(oot.connection_path, "w+") as outfile:
                     json.dump(result, outfile)
@@ -118,8 +118,11 @@ def initialize(oot):
                 oot.result_template, result=result, fields=oot.fields
             )
 
-    _logger.info("Configuring Access Point")
-    access_point = OotAccessPoint(ssid=oot.ssid, ip=DEFAULT_IP)
+    if no_access_point:
+        access_point = False
+    else:
+        _logger.info("Configuring Access Point")
+        access_point = OotAccessPoint(ssid=oot.ssid, ip=DEFAULT_IP)
     interfaces = is_interface_up("wlan0") or []
     first_start = not any(
         interface.get("addr", False) == DEFAULT_IP for interface in interfaces
@@ -130,33 +133,36 @@ def initialize(oot):
 def process(oot, access_point, app, parameters, connected_eth, first_start=False):
     server = ServerThread(app)
     try:
-        access_point.start()
-        if first_start:
-            _logger.info(
-                "On first start we must create twice the access point for configuration"
-            )
-            access_point.stop()
+        if access_point:
             access_point.start()
-        _logger.info("Access Point configured")
-        if not access_point.is_running():
-            raise Exception("Access point could not be raised")
+            if first_start:
+                _logger.info(
+                    "On first start we must create twice the access point for configuration"
+                )
+                access_point.stop()
+                access_point.start()
+            _logger.info("Access Point configured")
+            if not access_point.is_running():
+                raise Exception("Access point could not be raised")
         server.start()
         oot.start_connection(server, access_point)
-        while not parameters.get("processed") and access_point.is_running():
+        while not parameters.get("processed") and (not access_point or access_point.is_running()):
             pass
         _logger.info("Configuration has been launched. Waiting for execution")
         time.sleep(10)
     except KeyboardInterrupt:
         server.shutdown()
-        access_point.stop()
+        if access_point:
+            access_point.stop()
         raise
     server.shutdown()
     _logger.info("Server closed")
-    access_point.stop()
-    _logger.info("Access Point closed")
+    if access_point:
+        access_point.stop()
+        _logger.info("Access Point closed")
     if connected_eth:
         return
-    if not connected_eth and parameters.get("result_data", False):
+    if not connected_eth and parameters.get("result_data", False) and access_point:
         with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as f:
             f.write("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n")
             f.write("update_config=1\n")

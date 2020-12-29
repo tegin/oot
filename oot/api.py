@@ -8,8 +8,10 @@ def attrsetter(attr, value):
 
 
 def oot(method):
+    """Marks the method as a process that will send data to Odoo"""
     return attrsettermethod(method, "_oot_process", True)
 
 
 def amqp(command):
+    """Marks the method as and amqp command"""
     return attrsetter("_amqp_command", command)
